@@ -19,7 +19,6 @@ def init_db():
     if cursor.fetchone()[0] < 75:
         cursor.execute("DELETE FROM catalogo") 
         items_iniciales = [
-            # 1. MANO DE OBRA Y SERVICIOS PROFESIONALES
             ("Mano de Obra", "Hora de Electricista (Comercial / Industrial)", "Electrician Hourly Rate (Commercial)", 95.0, "hora"),
             ("Mano de Obra", "Hora de Ayudante / General (Helper)", "Helper / General Labor Hourly Rate", 45.0, "hora"),
             ("Mano de Obra", "Llamada de Emergencia / Service Call (Fuera de horario)", "Emergency Call-Out Fee (After hours)", 150.0, "servicio"),
@@ -29,7 +28,6 @@ def init_db():
             ("Mano de Obra", "Instalación de tubería EMT (Solo Labor por pie)", "EMT Conduit Install (Labor only per ft)", 4.5, "ft"),
             ("Mano de Obra", "Certificación e inspección de instalaciones", "Inspection & Code Compliance Check", 200.0, "servicio"),
             
-            # 2. INSTALACIONES Y AUTOMATIZACIÓN
             ("Instalación", "Tomacorriente 120V 20A Comercial (Mat. + Labor)", "Commercial Receptacle 120V 20A (Mat. + Labor)", 65.0, "unidad"),
             ("Instalación", "Tomacorriente GFCI 20A (Mat. + Labor)", "GFCI 20A Receptacle (Mat. + Labor)", 85.0, "unidad"),
             ("Instalación", "Tomacorriente Twist-Lock 20A/30A (Mat. + Labor)", "Twist-Lock Receptacle 20A/30A (Mat. + Labor)", 125.0, "unidad"),
@@ -41,7 +39,6 @@ def init_db():
             ("Instalación", "Relé Inteligente / Control de Automatización (ESP32/Arduino/Sonoff)", "Smart Home Automation Relay / Module", 95.0, "unidad"),
             ("Instalación", "Cámara de Seguridad PoE (Cableado e Instalación)", "PoE Security Camera (Wiring & Install)", 180.0, "unidad"),
             
-            # 3. ILUMINACIÓN COMERCIAL E INDUSTRIAL
             ("Iluminación", "Luminaria LED High Bay (Comercial/Industrial)", "LED High Bay Fixture Install", 220.0, "unidad"),
             ("Iluminación", "Luminaria LED Panel 2x4 (Troffer)", "2x4 LED Troffer Panel Install", 145.0, "unidad"),
             ("Iluminación", "Luminaria de Emergencia / Letrero Exit Sign", "Emergency / Exit Sign Fixture", 95.0, "unidad"),
@@ -52,7 +49,6 @@ def init_db():
             ("Iluminación", "Rocker / Sensor de Movimiento de Pared", "Wall Occupancy / Motion Sensor Install", 110.0, "unidad"),
             ("Iluminación", "Sensor Fotocelda Exterior 120-277V", "Exterior Photocell Sensor 120-277V", 45.0, "unidad"),
             
-            # 4. PANELES, BREAKERS Y ALTA CARGA
             ("Paneles", "Reemplazo de Breaker 15A/20A (1 Polo)", "1-Pole Breaker 15A/20A Replacement", 75.0, "unidad"),
             ("Paneles", "Reemplazo de Breaker 30A/40A/50A (2 Polos)", "2-Pole Breaker 30A-50A Replacement", 120.0, "unidad"),
             ("Paneles", "Breaker Trifásico (3 Polos) Comercial", "3-Pole Commercial Breaker Replacement", 180.0, "unidad"),
@@ -65,7 +61,6 @@ def init_db():
             ("Paneles", "Limpieza profunda, Torqueado e Inspección de Tablero", "Panel Torquing, Cleaning & Inspection", 150.0, "servicio"),
             ("Paneles", "Instalación de Supresor de Picos General (SPD)", "Whole-House / Commercial Surge Protector", 250.0, "unidad"),
             
-            # 5. MOTORES, CONTACTORES, TRANSFORMADORES Y CONTROLES
             ("Equipos Comerciales", "Sustitución de Contactor de Iluminación Multipolo", "Multipole Lighting Contactor Replacement", 250.0, "unidad"),
             ("Equipos Comerciales", "Sustitución de Contactor de Motor / Starter", "Motor Contactor / Starter Replacement", 185.0, "unidad"),
             ("Equipos Comerciales", "Instalación de Disconnect / Safety Switch 30A/60A", "Disconnect / Safety Switch 30A/60A", 220.0, "unidad"),
@@ -74,7 +69,6 @@ def init_db():
             ("Equipos Comerciales", "Instalación de Transformador Step-Down", "Step-Down Transformer Installation", 850.0, "unidad"),
             ("Equipos Comerciales", "Instalación de Relevador de Tiempo (Timer)", "Time Clock / Relay Installation", 130.0, "unidad"),
             
-            # 6. MATERIALES Y SUMINISTROS (Supply)
             ("Materiales", "Rollo Cable THHN #12 (500 ft)", "THHN #12 Wire Roll (500 ft)", 115.0, "rollo"),
             ("Materiales", "Rollo Cable THHN #10 (500 ft)", "THHN #10 Wire Roll (500 ft)", 165.0, "rollo"),
             ("Materiales", "Carrete Cable THHN #8 (Por pie)", "THHN #8 Wire (Per ft)", 0.65, "ft"),
@@ -89,7 +83,6 @@ def init_db():
             ("Materiales", "Lote Conectores, Coples y Abrazaderas EMT", "EMT Fittings & Straps (Lot)", 45.0, "lote"),
             ("Materiales", "Consumibles (Cinta, Wire Nuts, Pijas, Taquetes)", "Consumables (Tape, Wire Nuts, Screws)", 35.0, "lote"),
             
-            # 7. HVAC, MECÁNICA, MANTENIMIENTO Y CONSTRUCCIÓN
             ("Mantenimiento", "Mantenimiento Preventivo A/C Comercial", "Commercial A/C Preventative Maintenance", 150.0, "servicio"),
             ("Mantenimiento", "Recarga de Refrigerante A/C (por libra)", "A/C Refrigerant Recharge (per lb)", 45.0, "libra"),
             ("Mantenimiento", "Sustitución de Banda / Polea / Balero de Equipo", "Equipment Belt / Pulley / Bearing Replacement", 130.0, "servicio"),
@@ -171,21 +164,21 @@ def crear_pdf(cliente, codigo, fecha, subtotal, tax, total, items, is_es):
 
 st.set_page_config(page_title="Presupuestos - R.D. Avendano Solution", layout="wide", page_icon="⚡")
 
-# --- ESTÉTICA PREMIUM CORREGIDA (Contraste perfecto de textos) ---
+# --- ESTÉTICA OSCURA OPTIMIZADA CON CONTRASTE BLANCO PURO ---
 estilo_estetico = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
     
     .stApp {
-        background-color: #f1f5f9;
+        background-color: #0f172a !important;
         font-family: 'Inter', sans-serif;
-        color: #1e293b !important;
+        color: #ffffff !important;
     }
     
-    /* Asegurar visibilidad absoluta de títulos y textos generales */
-    h1, h2, h3, h4, h5, h6, p, span, label, div {
+    /* Forzar letras blancas brillantes y legibles en todos los elementos */
+    h1, h2, h3, h4, h5, h6, p, span, label, div, .stMarkdown {
         font-family: 'Inter', sans-serif;
-        color: #1e293b;
+        color: #ffffff !important;
     }
     
     h1, h2, h3 {
@@ -193,23 +186,23 @@ estilo_estetico = """
     }
     
     h1 {
-        color: #c97a6e !important;
+        color: #fca5a5 !important;
         font-weight: 700 !important;
     }
     
-    /* Tarjetas de contenedores limpias y legibles */
+    /* Tarjetas de contenedores oscuras y definidas */
     div[data-testid="stExpander"], div[data-testid="stVerticalBlock"] > div > div[data-baseweb="card"] {
-        background-color: #ffffff !important;
+        background-color: #1e293b !important;
         border-radius: 10px !important;
-        border: 1px solid #cbd5e1 !important;
-        color: #1e293b !important;
+        border: 1px solid #475569 !important;
+        color: #ffffff !important;
     }
 
-    /* Campos de texto y selectores perfectamente visibles */
+    /* Campos de texto y selectores perfectamente legibles */
     .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] {
-        background-color: #ffffff !important;
-        color: #1e293b !important;
-        border: 1px solid #94a3b8 !important;
+        background-color: #334155 !important;
+        color: #ffffff !important;
+        border: 1px solid #64748b !important;
         border-radius: 6px !important;
     }
     
@@ -234,7 +227,7 @@ estilo_estetico = """
         background-color: #1e293b !important;
     }
     [data-testid="stSidebar"] * {
-        color: #f8fafc !important;
+        color: #ffffff !important;
     }
     [data-testid="stSidebar"] input {
         background-color: #334155 !important;
@@ -278,8 +271,18 @@ codigo = f"EST-{datetime.now().strftime('%Y%m%d-%H%M')}"
 fecha = datetime.now().strftime('%Y-%m-%d')
 tax_rate = st.sidebar.number_input("Impuesto / Tax (%)", value=8.25, step=0.25) / 100
 
+# Textos dinámicos bilingües para las pestañas de herramientas
+t_tab1 = "🏗️ EMT"
+t_tab2 = "🔌 Watts/Amps"
+t_tab3 = "⚡ Ley Ohm" if is_es else "⚡ Ohm's Law"
+t_tab4 = "📉 Caída Tensión" if is_es else "📉 Voltage Drop"
+t_tab5 = "⚙️ Motores (HP)" if is_es else "⚙️ Motors (HP)"
+t_tab6 = "🔋 Transformadores" if is_es else "🔋 Transformers"
+t_tab7 = "📏 Tubería" if is_es else "📏 Conduit Fill"
+t_tab8 = "📖 Guía NEC" if is_es else "📖 NEC Guide"
+
 with st.expander("🧮 Herramientas, Calculadoras y Código NEC", expanded=False):
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["🏗️ EMT", "🔌 Watts/Amps", "⚡ Ley Ohm", "📉 Caída Tensión", "⚙️ Motores (HP)", "🔋 Transformadores", "📏 Tubería", "📖 Guía NEC"])
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([t_tab1, t_tab2, t_tab3, t_tab4, t_tab5, t_tab6, t_tab7, t_tab8])
     
     with tab1:
         c1, c2 = st.columns(2)
@@ -287,26 +290,30 @@ with st.expander("🧮 Herramientas, Calculadoras y Código NEC", expanded=False
         precio_tuberia = c1.number_input("Precio por pie", value=2.0)
         horas_labor = c2.number_input("Horas estimadas", min_value=0.0, step=1.0)
         tarifa_hora = c2.number_input("Tarifa por hora", value=85.0)
-        if st.button("Calcular EMT"):
+        btn_txt_emt = "Calcular EMT" if is_es else "Calculate EMT"
+        if st.button(btn_txt_emt):
             st.info(f"**Material:** ${pies_tuberia * precio_tuberia:.2f} | **Labor:** ${horas_labor * tarifa_hora:.2f} | **Total:** ${(pies_tuberia * precio_tuberia) + (horas_labor * tarifa_hora):.2f}")
             
     with tab2:
         c1, c2, c3 = st.columns(3)
         watts = c1.number_input("Potencia (Watts)", min_value=0, value=1500, step=100)
         volts_carga = c2.selectbox("Voltaje (V)", [120, 208, 240, 277, 480])
-        fases = c3.radio("Fases", ["1 Ph", "3 Ph"])
-        if st.button("Calcular Amperaje"):
+        fases_txt = "Fases" if is_es else "Phases"
+        fases = c3.radio(fases_txt, ["1 Ph", "3 Ph"])
+        btn_txt_amps = "Calcular Amperaje" if is_es else "Calculate Amperage"
+        if st.button(btn_txt_amps):
             amps = watts / volts_carga if fases == "1 Ph" else watts / (volts_carga * 1.732)
             st.success(f"🔌 **Corriente:** {amps:.2f} A | 🛡️ **Breaker Recomendado:** {amps * 1.25:.2f} A")
 
     with tab3:
-        opcion_ohm = st.radio("¿Qué buscas?", ["Voltaje", "Corriente", "Resistencia"], horizontal=True)
+        pregunta_ohm = "¿Qué buscas?" if is_es else "What are you looking for?"
+        opcion_ohm = st.radio(pregunta_ohm, ["Voltaje", "Corriente", "Resistencia"] if is_es else ["Voltage", "Current", "Resistance"], horizontal=True)
         c1, c2 = st.columns(2)
-        if opcion_ohm == "Voltaje":
+        if opcion_ohm in ["Voltaje", "Voltage"]:
             i_val = c1.number_input("Corriente (A)", value=10.0)
             r_val = c2.number_input("Resistencia (Ohmios)", value=12.0)
             st.success(f"⚡ **Voltaje:** {i_val * r_val:.2f} V")
-        elif opcion_ohm == "Corriente":
+        elif opcion_ohm in ["Corriente", "Current"]:
             v_val = c1.number_input("Voltaje (V)", value=120.0)
             r_val = c2.number_input("Resistencia (Ohmios)", value=12.0)
             st.success(f"⚡ **Corriente:** {v_val / r_val:.2f} A")
@@ -324,7 +331,8 @@ with st.expander("🧮 Herramientas, Calculadoras y Código NEC", expanded=False
         vd_mat = c3.radio("Material del Cable", ["Cobre (Cu)", "Aluminio (Al)"])
         vd_awg = c3.selectbox("Calibre (AWG)", ['14', '12', '10', '8', '6', '4', '3', '2', '1', '1/0', '2/0', '3/0', '4/0'])
         cm_dict = {'14': 4110, '12': 6530, '10': 10380, '8': 16510, '6': 26240, '4': 41740, '3': 52620, '2': 66360, '1': 83690, '1/0': 105600, '2/0': 133100, '3/0': 167800, '4/0': 211600}
-        if st.button("Calcular Caída"):
+        btn_txt_vd = "Calcular Caída" if is_es else "Calculate Drop"
+        if st.button(btn_txt_vd):
             K = 12.9 if "Cobre" in vd_mat else 21.2
             caida = ((2 if vd_fases == "1 Ph" else 1.732) * K * vd_amps * vd_dist) / cm_dict[vd_awg]
             porcentaje = (caida / vd_volts) * 100
@@ -337,7 +345,8 @@ with st.expander("🧮 Herramientas, Calculadoras y Código NEC", expanded=False
         hp_val = c1.number_input("Caballos de Fuerza (HP)", min_value=0.5, value=5.0, step=0.5)
         v_motor = c2.selectbox("Voltaje Motor", [120, 208, 230, 460])
         f_motor = c2.radio("Fases Motor", ["1 Ph", "3 Ph"], horizontal=True, key='fm')
-        if st.button("Estimar Amps Motor"):
+        btn_txt_motor = "Estimar Amps Motor" if is_es else "Estimate Motor Amps"
+        if st.button(btn_txt_motor):
             watts_motor = hp_val * 746
             amps_m = watts_motor / (v_motor * 0.85 * 0.85) if f_motor == "1 Ph" else watts_motor / (v_motor * 1.732 * 0.85 * 0.85)
             st.info(f"⚙️ **Corriente Estimada:** {amps_m:.2f} A")
@@ -348,7 +357,8 @@ with st.expander("🧮 Herramientas, Calculadoras y Código NEC", expanded=False
         kva_val = c1.number_input("Capacidad (kVA)", min_value=1.0, value=75.0, step=5.0)
         v_trans = c2.selectbox("Voltaje (Primario o Secundario)", [120, 208, 240, 277, 480], index=4)
         f_trans = c3.radio("Fases Transformador", ["1 Ph", "3 Ph"], index=1)
-        if st.button("Calcular Amps Transformador"):
+        btn_txt_trans = "Calcular Amps Transformador" if is_es else "Calculate Transformer Amps"
+        if st.button(btn_txt_trans):
             amps_t = (kva_val * 1000) / v_trans if f_trans == "1 Ph" else (kva_val * 1000) / (v_trans * 1.732)
             st.success(f"🔋 **Corriente a Plena Carga (FLA):** {amps_t:.2f} Amperios a {v_trans}V")
 
@@ -363,7 +373,8 @@ with st.expander("🧮 Herramientas, Calculadoras y Código NEC", expanded=False
             "1 pulgada": {"14": 35, "12": 26, "10": 16, "8": 9, "6": 7, "4": 4},
             "1 1/4 pulgada": {"14": 61, "12": 45, "10": 29, "8": 16, "6": 12, "4": 7}
         }
-        if st.button("Ver Límite NEC"):
+        btn_txt_fill = "Ver Límite NEC" if is_es else "Check NEC Limit"
+        if st.button(btn_txt_fill):
             max_cables = fill_data[conduit_size][awg_fill]
             st.info(f"📏 **Límite NEC (40%):** Puedes meter un máximo de **{max_cables} cables THHN #{awg_fill}** en un tubo EMT de {conduit_size}.")
 
@@ -387,13 +398,15 @@ st.subheader("🛒 Construir Presupuesto")
 df_catalogo = pd.read_sql_query("SELECT * FROM catalogo", conn)
 df_catalogo['display'] = df_catalogo['categoria'] + " - " + df_catalogo['item_es'] + " / " + df_catalogo['item_en']
 
-items_seleccionados = st.multiselect("Busca materiales o mano de obra (bilingüe):", df_catalogo['display'].tolist(), key="selector_items")
+lbl_search = "Busca materiales o mano de obra (bilingüe):" if is_es else "Search materials or labor (bilingual):"
+items_seleccionados = st.multiselect(lbl_search, df_catalogo['display'].tolist(), key="selector_items")
 
 filas = []
 subtotal_gen = 0.0
 
 if items_seleccionados:
-    st.markdown("### 📝 Ajuste de Cantidades, Precios y Descripciones")
+    lbl_adjust = "### 📝 Ajuste de Cantidades, Precios y Descripciones" if is_es else "### 📝 Adjust Quantities, Prices & Descriptions"
+    st.markdown(lbl_adjust)
     for i, item in enumerate(items_seleccionados):
         row = df_catalogo[df_catalogo['display'] == item].iloc[0]
         c1, c2, c3, c4 = st.columns([4, 2, 2, 2])
@@ -410,12 +423,14 @@ if items_seleccionados:
         
         filas.append({"descripcion": desc, "cantidad": cant, "precio_unitario": precio, "subtotal": sub})
 
-with st.expander("➕ Agregar un concepto personalizado o extra"):
+exp_title = "➕ Agregar un concepto personalizado o extra" if is_es else "➕ Add a custom or extra item"
+with st.expander(exp_title):
     c_l1, c_l2, c_l3, c_l4 = st.columns([4, 2, 2, 1])
     custom_desc = c_l1.text_input("Descripción extra", placeholder="Ej: Trabajo especial")
     custom_cant = c_l2.number_input("Cantidad", min_value=0.5, value=1.0, step=0.5, key="c_extra")
     custom_precio = c_l3.number_input("Precio U. ($)", min_value=0.0, value=50.0, step=5.0, key="p_extra")
-    if c_l4.button("Añadir") and custom_desc:
+    btn_add_txt = "Añadir" if is_es else "Add"
+    if c_l4.button(btn_add_txt) and custom_desc:
         st.session_state[f"extra_{custom_desc}"] = {"desc": custom_desc, "cant": custom_cant, "precio": custom_precio}
         st.rerun()
 
@@ -426,7 +441,7 @@ for key, val in list(st.session_state.items()):
         subtotal_gen += sub_extra
         ex_c1, ex_c2, ex_c3, ex_c4, ex_c5 = st.columns([3, 2, 2, 2, 1])
         ex_c1.write(f"📌 **Extra:** {val['desc']}")
-        ex_c2.write(f"Cant: {val['desc']}")
+        ex_c2.write(f"Cant: {val['cant']}")
         ex_c3.write(f"Precio U: ${val['precio']:.2f}")
         ex_c4.metric("Subtotal", f"${sub_extra:.2f}")
         if ex_c5.button("❌", key=f"del_{key}"):
@@ -443,7 +458,8 @@ if filas:
     total_final = subtotal_gen + monto_tax
     
     st.markdown("---")
-    st.markdown("### 📊 Resumen Financiero")
+    lbl_summary = "### 📊 Resumen Financiero" if is_es else "### 📊 Financial Summary"
+    st.markdown(lbl_summary)
     c_res1, c_res2, c_res3 = st.columns(3)
     c_res1.info(f"**Subtotal:** ${subtotal_gen:,.2f}")
     c_res2.warning(f"**Tax ({(tax_rate*100):.2f}%):** ${monto_tax:,.2f}")
@@ -452,12 +468,14 @@ if filas:
     pdf_bytes = crear_pdf(cliente, codigo, fecha, subtotal_gen, monto_tax, total_final, filas, is_es)
     
     st.markdown("---")
-    st.subheader("👁️ Previsualización del Documento en PDF")
+    lbl_preview = "👁️ Previsualización del Documento en PDF" if is_es else "👁️ PDF Document Preview"
+    st.subheader(lbl_preview)
     b64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
     pdf_display = f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="600px" type="application/pdf"></iframe>'
     st.markdown(pdf_display, unsafe_allow_html=True)
     
     b64 = base64.b64encode(pdf_bytes).decode()
     st.markdown("<br>", unsafe_allow_html=True)
-    href = f'<a href="data:application/octet-stream;base64,{b64}" download="{codigo}.pdf"><button style="width:100%; padding:15px; background-color:#c97a6e; color:white; font-size:18px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">📥 DESCARGAR PRESUPUESTO EN PDF</button></a>'
+    btn_download_txt = "📥 DESCARGAR PRESUPUESTO EN PDF" if is_es else "📥 DOWNLOAD ESTIMATE PDF"
+    href = f'<a href="data:application/octet-stream;base64,{b64}" download="{codigo}.pdf"><button style="width:100%; padding:15px; background-color:#c97a6e; color:white; font-size:18px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">{btn_download_txt}</button></a>'
     st.markdown(href, unsafe_allow_html=True)
