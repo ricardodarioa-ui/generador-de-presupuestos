@@ -18,7 +18,7 @@ html_code = """
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- Esta línea es la que soluciona los saltos y el zoom automático en el iPhone -->
+    <!-- Bloqueo de zoom automático para fluidez en iPhone -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Generador de Facturas - R.D. Avendano Solutions</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -169,12 +169,12 @@ html_code = """
             <div class="payment-info">
                 <h4 id="lbl-terms-title" contenteditable="true">Términos de Pago:</h4>
                 <select id="terms-selector" class="terms-selector no-print" onchange="insertarTermino()">
-                    <option value="">-- Autocompletar --</option>
-                    <option value="receipt">Pago inmediato</option>
-                    <option value="net15">A 15 días</option>
-                    <option value="net30">A 30 días</option>
-                    <option value="completion">Al finalizar</option>
-                    <option value="half">50% y 50%</option>
+                    <option id="opt-0" value="">-- Autocompletar --</option>
+                    <option id="opt-1" value="receipt">Pago inmediato</option>
+                    <option id="opt-2" value="net15">A 15 días</option>
+                    <option id="opt-3" value="net30">A 30 días</option>
+                    <option id="opt-4" value="completion">Al finalizar</option>
+                    <option id="opt-5" value="half">50% y 50%</option>
                 </select>
                 <p id="lbl-terms-desc" contenteditable="true">Pagadero al recibir esta factura. Agradecemos su pronto pago.</p>
                 
@@ -207,6 +207,66 @@ html_code = """
             actualizarListaClientes();
             calc();
         };
+
+        // Diccionario de Traducción Completo
+        const i18n = {
+            es: { 
+                title: "FACTURA", billTo: "Facturar a:", invNo: "Nº de Factura:", date: "Fecha:", 
+                desc: "Descripción", qty: "Cant.", price: "Precio", amount: "Importe",
+                id: "Identificación", phone: "Teléfono", email: "Correo", 
+                termsTitle: "Términos de Pago:", methodsTitle: "Métodos Aceptados:", 
+                subtotal: "Subtotal:", tax: "Impuestos (8.25%):", total: "TOTAL:",
+                opt0: "-- Autocompletar --", opt1: "Pago inmediato", opt2: "A 15 días", opt3: "A 30 días", opt4: "Al finalizar", opt5: "50% y 50%"
+            },
+            en: { 
+                title: "INVOICE", billTo: "Bill To:", invNo: "Invoice No:", date: "Date:", 
+                desc: "Description", qty: "Qty", price: "Price", amount: "Amount",
+                id: "ID", phone: "Phone", email: "Email", 
+                termsTitle: "Payment Terms:", methodsTitle: "Accepted Methods:", 
+                subtotal: "Subtotal:", tax: "Tax (8.25%):", total: "TOTAL:",
+                opt0: "-- Autocomplete --", opt1: "Due on receipt", opt2: "Net 15", opt3: "Net 30", opt4: "Upon completion", opt5: "50% and 50%"
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = i18n[lang];
+            
+            // Cambiar todos los textos
+            document.getElementById('lbl-invoice-title').innerText = t.title;
+            document.getElementById('lbl-bill-to').innerText = t.billTo;
+            document.getElementById('lbl-inv-no').innerText = t.invNo;
+            document.getElementById('lbl-date').innerText = t.date;
+            document.getElementById('lbl-desc').innerText = t.desc;
+            document.getElementById('lbl-qty').innerText = t.qty;
+            document.getElementById('lbl-price').innerText = t.price;
+            document.getElementById('lbl-amount').innerText = t.amount;
+            
+            // Los campos que faltaban:
+            document.getElementById('lbl-id').innerText = t.id;
+            document.getElementById('lbl-phone').innerText = t.phone;
+            document.getElementById('lbl-email').innerText = t.email;
+            
+            document.getElementById('lbl-terms-title').innerText = t.termsTitle;
+            document.getElementById('lbl-methods-title').innerText = t.methodsTitle;
+            document.getElementById('lbl-subtotal').innerText = t.subtotal;
+            document.getElementById('lbl-tax').innerText = t.tax;
+            document.getElementById('lbl-total').innerText = t.total;
+
+            document.getElementById('opt-0').innerText = t.opt0;
+            document.getElementById('opt-1').innerText = t.opt1;
+            document.getElementById('opt-2').innerText = t.opt2;
+            document.getElementById('opt-3').innerText = t.opt3;
+            document.getElementById('opt-4').innerText = t.opt4;
+            document.getElementById('opt-5').innerText = t.opt5;
+
+            // Traducir métodos de pago por defecto
+            if (lang === 'en') {
+                document.getElementById('lbl-methods-desc').innerHTML = "- Zelle<br>- Check (Ricardo Avendano)<br>- Cash";
+            } else {
+                document.getElementById('lbl-methods-desc').innerHTML = "- Zelle<br>- Cheque (Ricardo Avendano)<br>- Efectivo";
+            }
+        }
 
         // Función para guardar clientes en el celular
         function guardarCliente() {
@@ -252,11 +312,20 @@ html_code = """
         }
 
         const standardTerms = {
-            receipt: "Pagadero al recibir esta factura. Agradecemos su pronto pago.",
-            net15: "Neto 15 días. El pago debe efectuarse en un plazo de 15 días.",
-            net30: "Neto 30 días. El pago debe efectuarse en un plazo de 30 días.",
-            completion: "El pago debe realizarse al finalizar el trabajo.",
-            half: "50% de anticipo, 50% restante al finalizar."
+            es: {
+                receipt: "Pagadero al recibir esta factura. Agradecemos su pronto pago.",
+                net15: "Neto 15 días. El pago debe efectuarse en un plazo de 15 días.",
+                net30: "Neto 30 días. El pago debe efectuarse en un plazo de 30 días.",
+                completion: "El pago debe realizarse al finalizar el trabajo.",
+                half: "50% de anticipo, 50% restante al finalizar."
+            },
+            en: {
+                receipt: "Payable upon receipt of this invoice. We appreciate your prompt payment.",
+                net15: "Net 15. Payment is due within 15 days of the invoice date.",
+                net30: "Net 30. Payment is due within 30 days of the invoice date.",
+                completion: "Payment is due in full upon satisfactory completion of the work.",
+                half: "50% deposit to commence work, 50% remaining upon completion."
+            }
         };
 
         function formatSentenceCase(el) {
@@ -267,7 +336,7 @@ html_code = """
         function insertarTermino() {
             const selector = document.getElementById('terms-selector');
             if(selector.value) {
-                document.getElementById('lbl-terms-desc').innerText = standardTerms[selector.value];
+                document.getElementById('lbl-terms-desc').innerText = standardTerms[currentLang][selector.value];
                 selector.value = ""; 
             }
         }
@@ -315,28 +384,6 @@ html_code = """
             let sub = parseFloat(document.getElementById('val-subtotal').innerText) || 0;
             let tax = parseFloat(document.getElementById('val-tax').innerText) || 0;
             document.getElementById('val-total').innerText = (sub + tax).toFixed(2);
-        }
-
-        function setLanguage(lang) {
-            currentLang = lang;
-            if (lang === 'en') {
-                document.getElementById('lbl-invoice-title').innerText = "INVOICE";
-                document.getElementById('lbl-bill-to').innerText = "Bill To:";
-                document.getElementById('lbl-inv-no').innerText = "Invoice No:";
-                document.getElementById('lbl-date').innerText = "Date:";
-                document.getElementById('lbl-desc').innerText = "Description";
-                document.getElementById('lbl-qty').innerText = "Qty";
-                document.getElementById('lbl-price').innerText = "Price";
-                document.getElementById('lbl-amount').innerText = "Amount";
-                document.getElementById('lbl-terms-title').innerText = "Payment Terms:";
-                document.getElementById('lbl-methods-title').innerText = "Accepted Methods:";
-                document.getElementById('lbl-methods-desc').innerHTML = "- Zelle<br>- Check (Ricardo Avendano)<br>- Cash";
-                document.getElementById('lbl-subtotal').innerText = "Subtotal:";
-                document.getElementById('lbl-tax').innerText = "Tax (8.25%):";
-                document.getElementById('lbl-total').innerText = "TOTAL:";
-            } else {
-                location.reload();
-            }
         }
     </script>
 </body>
