@@ -2,169 +2,203 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 from fpdf import FPDF
-import base64
 import os
 
-st.set_page_config(page_title="Facturas - R.D. Avendano Solution", layout="wide", page_icon="🧾")
+# Configuración de página
+st.set_page_config(page_title="Facturas - R.D. Avendano Solutions", layout="centered", page_icon="🧾")
 
-# Estilo ultra fluido optimizado para celular
+# 1. DISEÑO ESTÉTICO DE ALTA GAMA (CSS Inyectado)
 st.markdown("""
 <style>
-    .stApp { background-color: #f8fafc; }
-    h1, h2, h3 { color: #1e293b; }
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+    
+    .stApp { background-color: #f1f5f9; }
+    
+    /* Contenedor principal estilo "hoja de papel" */
+    .block-container {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        padding: 2.5rem 2.5rem !important;
+        max-width: 850px;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    h1, h2, h3, p, span, div, label { font-family: 'Inter', sans-serif; }
+    
+    .company-title { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+    .invoice-title { font-family: 'Space Grotesk', sans-serif; font-size: 34px; font-weight: 700; color: #c97a6e; text-align: right; margin-bottom: 2px; }
+    .details-text { font-size: 13px; color: #64748b; line-height: 1.6; }
+    
+    /* Diseño del botón de descarga */
+    div[data-testid="stDownloadButton"] > button {
+        background-color: #c97a6e; color: white; width: 100%; padding: 12px; 
+        font-size: 15px; font-weight: 600; border: none; border-radius: 8px; transition: all 0.2s;
+    }
+    div[data-testid="stDownloadButton"] > button:hover { background-color: #b0665a; color: white; }
+    
+    /* Botón secundario (Avanzar Factura) */
+    .stButton > button { background-color: #1e293b; color: white; width: 100%; padding: 12px; font-weight: 500; border-radius: 8px; }
+    .stButton > button:hover { background-color: #334155; color: white; }
 </style>
 """, unsafe_allow_html=True)
 
-idioma = st.sidebar.radio("🌐 Idioma / Language", ["Español", "English"])
-is_es = idioma == "Español"
+# 2. LÓGICA DE MEMORIA Y AUTOMATIZACIÓN
+if 'invoice_seq' not in st.session_state:
+    st.session_state.invoice_seq = 1
 
-st.title("🧾 R.D. Avendano Solutions")
-st.markdown("*7150 Foxbrick Ln, Apt 4105, Humble, TX 77338 • Tel: +1 346 333 5819*")
+if 'clientes_db' not in st.session_state:
+    st.session_state.clientes_db = {"Comercial Client LLC": "Houston, TX"}
 
-# Memoria automática para el número de factura y datos
-if 'secuencia_factura' not in st.session_state:
-    st.session_state.secuencia_factura = 1
+if 'df_items' not in st.session_state:
+    st.session_state.df_items = pd.DataFrame([{"Descripción": "Servicio eléctrico general", "Cant.": 1.0, "Precio U.": 150.0}])
 
-st.sidebar.header("📋 Datos de la Factura")
+fecha_actual = datetime.now().strftime('%Y-%m-%d')
 year = datetime.now().year
-default_inv = f"{year}-{st.session_state.secuencia_factura:03d}"
-codigo_factura = st.sidebar.text_input("Nº de Factura (Auto)", value=default_inv)
-fecha_factura = st.sidebar.date_input("Fecha", datetime.now())
-tax_rate = st.sidebar.number_input("Impuesto / Tax (%)", value=8.25, step=0.25) / 100
+num_factura = f"{year}-{st.session_state.invoice_seq:03d}"
 
-st.sidebar.markdown("---")
-cliente_nombre = st.sidebar.text_input("Nombre del Cliente", "Comercial Client LLC")
-cliente_direccion = st.sidebar.text_area("Dirección del Cliente", "Houston, TX")
+# 3. ENCABEZADO VISUAL ELEGANTE
+c1, c2 = st.columns([1.5, 1])
+with c1:
+    st.markdown('<p class="company-title">R.D. AVENDANO SOLUTIONS</p>', unsafe_allow_html=True)
+    st.markdown('<p class="details-text">ID: Ricardo Avendano<br>Tel: +1 346 333 5819 | Correo: ricardodario.a@gmail.com<br>7150 Foxbrick Ln, Apt 4105, Humble, TX 77338</p>', unsafe_allow_html=True)
+with c2:
+    st.markdown('<p class="invoice-title">FACTURA</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="details-text" style="text-align: right;"><strong>Fecha:</strong> {fecha_actual}<br><strong>Nº:</strong> {num_factura}</p>', unsafe_allow_html=True)
 
-st.markdown("### 🛒 Partidas de la Factura")
+st.markdown("<hr style='margin-top:10px; border-color:#e2e8f0;'>", unsafe_allow_html=True)
 
-if 'factura_items' not in st.session_state:
-    st.session_state.factura_items = [{"descripcion": "Servicio eléctrico general", "cantidad": 1.0, "precio": 150.0}]
+# 4. BASE DE DATOS DE CLIENTES DINÁMICA
+st.markdown("### 👤 Facturar a:")
+col_cl1, col_cl2 = st.columns(2)
+cliente_seleccionado = col_cl1.selectbox("Seleccionar Cliente Guardado", ["-- Crear Nuevo Cliente --"] + list(st.session_state.clientes_db.keys()))
 
-with st.form("form_item", clear_on_submit=True):
-    c1, c2, c3 = st.columns([4, 1, 1])
-    d_input = c1.text_input("Descripción del servicio o material")
-    c_input = c2.number_input("Cant.", min_value=0.5, value=1.0, step=0.5)
-    p_input = c3.number_input("Precio U. ($)", min_value=0.0, value=50.0, step=5.0)
-    submitted = st.form_submit_button("➕ Agregar Concepto")
-    if submitted and d_input:
-        st.session_state.factura_items.append({"descripcion": d_input, "cantidad": c_input, "precio": p_input})
-        st.rerun()
+if cliente_seleccionado == "-- Crear Nuevo Cliente --":
+    cliente_nombre = col_cl1.text_input("Nombre de la Empresa o Cliente")
+    cliente_dir = col_cl2.text_area("Dirección del Cliente")
+    if col_cl2.button("💾 Guardar Nuevo Cliente"):
+        if cliente_nombre:
+            st.session_state.clientes_db[cliente_nombre] = cliente_dir
+            st.rerun()
+else:
+    cliente_nombre = cliente_seleccionado
+    cliente_dir = col_cl2.text_area("Dirección", value=st.session_state.clientes_db[cliente_nombre])
 
-subtotal_gen = 0.0
-to_delete = []
-
-if st.session_state.factura_items:
-    for idx, item in enumerate(st.session_state.factura_items):
-        col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 1])
-        item['descripcion'] = col1.text_input(f"Desc {idx+1}", value=item['descripcion'], key=f"d_{idx}")
-        item['cantidad'] = col2.number_input(f"Cant {idx+1}", value=float(item['cantidad']), min_value=0.1, step=0.5, key=f"c_{idx}")
-        item['precio'] = col3.number_input(f"Precio {idx+1}", value=float(item['precio']), min_value=0.0, step=5.0, key=f"p_{idx}")
-        sub_i = item['cantidad'] * item['precio']
-        subtotal_gen += sub_i
-        col4.metric(f"Sub {idx+1}", f"${sub_i:.2f}")
-        if col5.button("❌", key=f"del_{idx}"):
-            to_delete.append(idx)
-
-    if to_delete:
-        for i in sorted(to_delete, reverse=True):
-            st.session_state.factura_items.pop(i)
-        st.rerun()
-
-    if st.button("🗑️ Vaciar lista"):
-        st.session_state.factura_items = []
-        st.rerun()
-
+# 5. TABLA DE CONCEPTOS OPTIMIZADA PARA CELULAR
 st.markdown("---")
-st.subheader("💳 Condiciones y Términos")
-terminos_texto = st.selectbox("Términos de Pago", [
-    "Pagadero al recibir esta factura. Agradecemos su pronto pago.",
-    "Neto 15 días. El pago debe efectuarse en un plazo de 15 días.",
-    "Neto 30 días. El pago debe efectuarse en un plazo de 30 días.",
-    "El pago debe realizarse al finalizar el trabajo.",
-    "50% de anticipo, 50% restante al finalizar."
-])
-metodos_pago = "- Zelle\n- Cheque (Ricardo Avendano)\n- Efectivo"
+st.markdown("### 🛒 Conceptos y Servicios")
+edited_df = st.data_editor(
+    st.session_state.df_items,
+    num_rows="dynamic",
+    use_container_width=True,
+    hide_index=True,
+    column_config={
+        "Descripción": st.column_config.TextColumn("Descripción", required=True),
+        "Cant.": st.column_config.NumberColumn("Cant.", min_value=0.1, step=0.5, format="%.1f", required=True),
+        "Precio U.": st.column_config.NumberColumn("Precio U.", min_value=0.0, step=5.0, format="$%.2f", required=True)
+    }
+)
+st.session_state.df_items = edited_df
 
-if st.session_state.factura_items:
-    monto_tax = subtotal_gen * tax_rate
-    total_final = subtotal_gen + monto_tax
+# 6. CÁLCULOS AUTOMÁTICOS
+edited_df["Importe"] = edited_df["Cant."] * edited_df["Precio U."]
+subtotal = edited_df["Importe"].sum()
+tax = subtotal * 0.0825
+total = subtotal + tax
 
-    st.markdown("---")
-    st.markdown("### 📊 Totales")
-    r1, r2, r3 = st.columns(3)
-    r1.info(f"**Subtotal:** ${subtotal_gen:,.2f}")
-    r2.warning(f"**Tax ({(tax_rate*100):.2f}%):** ${monto_tax:,.2f}")
-    r3.success(f"**TOTAL:** ${total_final:,.2f}")
+# 7. TOTALES Y TÉRMINOS
+st.markdown("---")
+col_t1, col_t2 = st.columns([1.2, 1])
+with col_t1:
+    st.markdown("**💳 Condiciones de Pago:**")
+    terminos = st.selectbox("Condiciones", ["Pagadero al recibir esta factura", "A 15 días (Net 15)", "A 30 días (Net 30)", "50% anticipo, 50% al finalizar"], label_visibility="collapsed")
+    st.markdown("<p class='details-text' style='margin-top:10px;'><strong>Métodos:</strong> Zelle, Cheque (Ricardo Avendano), Efectivo</p>", unsafe_allow_html=True)
 
-    def generar_pdf_nativo(cliente, dir_c, codigo, fecha_str, subtotal, tax, total, items, terminos, is_es):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", 'B', 14)
-        pdf.cell(200, 8, txt="R.D. AVENDANO SOLUTIONS", ln=True, align='C')
-        pdf.set_font("Arial", size=9)
-        pdf.cell(200, 4, txt="7150 Foxbrick Ln, Apt 4105, Humble, TX 77338", ln=True, align='C')
-        pdf.cell(200, 4, txt="Tel: +1 346 333 5819 | Email: ricardodario.a@gmail.com", ln=True, align='C')
-        pdf.ln(5)
-        
-        pdf.set_font("Arial", 'B', 14)
-        pdf.cell(200, 8, txt="FACTURA" if is_es else "INVOICE", ln=True, align='C')
-        pdf.set_font("Arial", size=10)
-        pdf.cell(200, 6, txt=f"Fecha / Date: {fecha_str} | Factura #: {codigo}", ln=True, align='R')
-        pdf.cell(200, 6, txt=f"Cliente: {cliente}", ln=True, align='L')
-        pdf.cell(200, 6, txt=f"Dirección: {dir_c}", ln=True, align='L')
-        pdf.ln(5)
-        
-        pdf.set_fill_color(220, 230, 242)
-        pdf.set_font("Arial", 'B', 10)
-        pdf.cell(105, 8, "Descripción" if is_es else "Description", border=1, fill=True)
-        pdf.cell(15, 8, "Cant", border=1, align='C', fill=True)
-        pdf.cell(35, 8, "Precio U.", border=1, align='C', fill=True)
-        pdf.cell(35, 8, "Importe", border=1, align='C', fill=True)
+with col_t2:
+    st.markdown(f"""
+    <div style="text-align: right;">
+        <p class="details-text" style="font-size: 15px; margin-bottom: 5px;">Subtotal: &nbsp;<strong>${subtotal:,.2f}</strong></p>
+        <p class="details-text" style="font-size: 15px; margin-bottom: 5px;">Impuestos (8.25%): &nbsp;<strong>${tax:,.2f}</strong></p>
+        <p style="font-size: 26px; font-weight: 700; color: #c97a6e; margin-top: 10px;">TOTAL: ${total:,.2f}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 8. GENERADOR DE PDF NATIVO
+def generar_pdf():
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(200, 8, txt="R.D. AVENDANO SOLUTIONS", ln=True, align='C')
+    pdf.set_font("Arial", size=9)
+    pdf.cell(200, 4, txt="7150 Foxbrick Ln, Apt 4105, Humble, TX 77338", ln=True, align='C')
+    pdf.cell(200, 4, txt="Tel: +1 346 333 5819 | Email: ricardodario.a@gmail.com", ln=True, align='C')
+    pdf.ln(5)
+    
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(200, 8, txt="FACTURA / INVOICE", ln=True, align='C')
+    pdf.set_font("Arial", size=10)
+    pdf.cell(200, 6, txt=f"Fecha: {fecha_actual} | Factura #: {num_factura}", ln=True, align='R')
+    pdf.cell(200, 6, txt=f"Cliente: {cliente_nombre}", ln=True, align='L')
+    pdf.cell(200, 6, txt=f"Direccion: {cliente_dir.replace(chr(10), ' ')}", ln=True, align='L')
+    pdf.ln(5)
+    
+    pdf.set_fill_color(220, 230, 242)
+    pdf.set_font("Arial", 'B', 10)
+    pdf.cell(105, 8, "Descripcion", border=1, fill=True)
+    pdf.cell(15, 8, "Cant", border=1, align='C', fill=True)
+    pdf.cell(35, 8, "Precio U.", border=1, align='C', fill=True)
+    pdf.cell(35, 8, "Importe", border=1, align='C', fill=True)
+    pdf.ln()
+    
+    pdf.set_font("Arial", size=10)
+    for _, row in edited_df.iterrows():
+        desc = str(row['Descripción'])[:50]
+        c_val = row['Cant.']
+        p_val = row['Precio U.']
+        imp = c_val * p_val
+        pdf.cell(105, 8, desc, border=1)
+        pdf.cell(15, 8, f"{c_val:.1f}", border=1, align='C')
+        pdf.cell(35, 8, f"${p_val:.2f}", border=1, align='C')
+        pdf.cell(35, 8, f"${imp:.2f}", border=1, align='C')
         pdf.ln()
         
-        pdf.set_font("Arial", size=10)
-        for it in items:
-            desc = it['descripcion'][:50]
-            sub_it = it['cantidad'] * it['precio']
-            pdf.cell(105, 8, desc, border=1)
-            pdf.cell(15, 8, str(it['cantidad']), border=1, align='C')
-            pdf.cell(35, 8, f"${it['precio']:.2f}", border=1, align='C')
-            pdf.cell(35, 8, f"${sub_it:.2f}", border=1, align='C')
-            pdf.ln()
-            
-        pdf.ln(5)
-        pdf.set_font("Arial", 'B', 11)
-        pdf.cell(155, 7, "Subtotal:", align='R')
-        pdf.cell(35, 7, f"${subtotal:.2f}", ln=True, align='R', border=1)
-        pdf.cell(155, 7, "Tax:", align='R')
-        pdf.cell(35, 7, f"${tax:.2f}", ln=True, align='R', border=1)
-        pdf.set_fill_color(200, 255, 200)
-        pdf.cell(155, 8, "TOTAL:", align='R')
-        pdf.cell(35, 8, f"${total:.2f}", ln=True, align='R', border=1, fill=True)
-        
-        pdf.ln(8)
-        pdf.set_font("Arial", 'B', 10)
-        pdf.cell(200, 5, txt="Términos de Pago:", ln=True)
-        pdf.set_font("Arial", size=9)
-        pdf.multi_cell(200, 4, txt=terminos)
-        
-        tmp = f"{codigo.replace('/', '-')}.pdf"
-        pdf.output(tmp)
-        with open(tmp, "rb") as f:
-            b = f.read()
-        os.remove(tmp)
-        return b
-
-    pdf_bytes = generar_pdf_nativo(cliente_nombre, cliente_direccion, codigo_factura, fecha_factura.strftime('%Y-%m-%d'), subtotal_gen, monto_tax, total_final, st.session_state.factura_items, terminos_texto, is_es)
+    pdf.ln(5)
+    pdf.set_font("Arial", 'B', 11)
+    pdf.cell(155, 7, "Subtotal:", align='R')
+    pdf.cell(35, 7, f"${subtotal:.2f}", ln=True, align='R', border=1)
+    pdf.cell(155, 7, "Tax (8.25%):", align='R')
+    pdf.cell(35, 7, f"${tax:.2f}", ln=True, align='R', border=1)
+    pdf.set_fill_color(200, 255, 200)
+    pdf.cell(155, 8, "TOTAL:", align='R')
+    pdf.cell(35, 8, f"${total:.2f}", ln=True, align='R', border=1, fill=True)
     
-    st.markdown("---")
-    b64 = base64.b64encode(pdf_bytes).decode('utf-8')
-    href = f'<a href="data:application/octet-stream;base64,{b64}" download="{codigo_factura}.pdf"><button style="width:100%; padding:15px; background-color:#1b5e20; color:white; font-size:18px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">📥 DESCARGAR FACTURA EN PDF</button></a>'
-    st.markdown(href, unsafe_allow_html=True)
+    pdf.ln(8)
+    pdf.set_font("Arial", 'B', 10)
+    pdf.cell(200, 5, txt="Condiciones de Pago:", ln=True)
+    pdf.set_font("Arial", size=9)
+    pdf.multi_cell(200, 4, txt=f"{terminos}. Metodos: Zelle, Cheque (Ricardo Avendano), Efectivo.")
+    
+    tmp = f"{num_factura}.pdf"
+    pdf.output(tmp)
+    with open(tmp, "rb") as f:
+        data = f.read()
+    os.remove(tmp)
+    return data
 
-    # Botón para autoincrementar el número de factura para la siguiente vez
-    if st.button("✅ Factura Emitida (Avanzar al siguiente número)"):
-        st.session_state.secuencia_factura += 1
-        st.success("¡Número de factura actualizado para la próxima!")
+st.markdown("---")
+col_b1, col_b2 = st.columns(2)
+
+with col_b1:
+    st.download_button(
+        label="📥 DESCARGAR FACTURA (PDF)",
+        data=generar_pdf(),
+        file_name=f"Factura_{num_factura}.pdf",
+        mime="application/pdf"
+    )
+
+with col_b2:
+    if st.button("✅ Factura Cobrada (Avanzar al siguiente Nº)"):
+        st.session_state.invoice_seq += 1
+        st.session_state.df_items = pd.DataFrame([{"Descripción": "Servicio eléctrico general", "Cant.": 1.0, "Precio U.": 150.0}])
         st.rerun()
