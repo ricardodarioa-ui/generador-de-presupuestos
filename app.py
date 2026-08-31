@@ -4,7 +4,6 @@ from datetime import datetime
 
 st.set_page_config(page_title="R.D. Avendano Solutions - Facturas", layout="wide")
 
-# Ocultar elementos de Streamlit para que parezca una app web limpia
 hide_streamlit_style = """
 <style>
 #MainMenu {visibility: hidden;}
@@ -107,7 +106,7 @@ html_code = """
                 <div class="company-details">
                     <div><span id="lbl-id" contenteditable="true">Identificación</span>: Ricardo Avendano</div>
                     <div><span id="lbl-phone" contenteditable="true">Teléfono</span>: +1 346 333 5819 | <span id="lbl-email" contenteditable="true">Correo</span>: ricardodario.a@gmail.com</div>
-                    <div id="company-address" contenteditable="true">7150 Foxbridge Ln, Apt 4105, Humble, TX 77338</div>
+                    <div id="company-address" contenteditable="true">7150 Foxbrick Ln, Apt 4105, Humble, TX 77338</div>
                 </div>
             </div>
             <div class="invoice-title-container">
