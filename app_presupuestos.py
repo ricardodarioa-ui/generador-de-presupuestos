@@ -110,7 +110,6 @@ def crear_pdf(cliente, codigo, fecha, subtotal, tax, total, items, is_es):
     pdf = FPDF()
     pdf.add_page()
     
-    # --- ENCABEZADO ACTUALIZADO CON LA DIRECCIÓN CORRECTA (Foxbrick) ---
     pdf.set_font("Arial", 'B', 14)
     pdf.cell(200, 8, txt="R.D. Avendano Solution", ln=True, align='C')
     pdf.set_font("Arial", size=10)
@@ -127,7 +126,7 @@ def crear_pdf(cliente, codigo, fecha, subtotal, tax, total, items, is_es):
     pdf.cell(200, 6, txt=f"Cliente / Client: {cliente}", ln=True, align='L')
     pdf.ln(5)
     
-    pdf.set_fill_color(220, 230, 242) # Ajustado al color elegante de facturas
+    pdf.set_fill_color(220, 230, 242)
     pdf.set_font("Arial", 'B', 10)
     h_desc = "Descripción de los Trabajos / Materiales" if is_es else "Job / Material Description"
     h_cant = "Cant" if is_es else "Qty"
@@ -172,7 +171,7 @@ def crear_pdf(cliente, codigo, fecha, subtotal, tax, total, items, is_es):
 
 st.set_page_config(page_title="Presupuestos - R.D. Avendano Solution", layout="wide", page_icon="⚡")
 
-# --- INYECCIÓN DE ESTÉTICA PREMIUM (Igual a la de Facturas) ---
+# --- ESTÉTICA PREMIUM CORREGIDA (Contraste perfecto de textos) ---
 estilo_estetico = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
@@ -180,12 +179,17 @@ estilo_estetico = """
     .stApp {
         background-color: #f1f5f9;
         font-family: 'Inter', sans-serif;
+        color: #1e293b !important;
+    }
+    
+    /* Asegurar visibilidad absoluta de títulos y textos generales */
+    h1, h2, h3, h4, h5, h6, p, span, label, div {
+        font-family: 'Inter', sans-serif;
         color: #1e293b;
     }
     
-    h1, h2, h3, h4 {
+    h1, h2, h3 {
         font-family: 'Space Grotesk', sans-serif !important;
-        color: #1e293b !important;
     }
     
     h1 {
@@ -193,7 +197,23 @@ estilo_estetico = """
         font-weight: 700 !important;
     }
     
-    /* Botones estilizados con el color terracota/salmón de la app de facturas */
+    /* Tarjetas de contenedores limpias y legibles */
+    div[data-testid="stExpander"], div[data-testid="stVerticalBlock"] > div > div[data-baseweb="card"] {
+        background-color: #ffffff !important;
+        border-radius: 10px !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #1e293b !important;
+    }
+
+    /* Campos de texto y selectores perfectamente visibles */
+    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        border: 1px solid #94a3b8 !important;
+        border-radius: 6px !important;
+    }
+    
+    /* Botones principales con el color terracota/salmón característico */
     .stButton > button, div[data-testid="stFormSubmitButton"] > button, div[data-testid="stDownloadButton"] > button {
         background-color: #c97a6e !important;
         color: white !important;
@@ -204,8 +224,9 @@ estilo_estetico = """
         transition: all 0.2s !important;
         width: 100%;
     }
-    .stButton > button:hover, div[data-testid="stFormSubmitButton"] > button:hover {
+    .stButton > button:hover, div[data-testid="stFormSubmitButton"] > button:hover, div[data-testid="stDownloadButton"] > button:hover {
         background-color: #b0665a !important;
+        color: white !important;
     }
     
     /* Barra lateral elegante */
@@ -218,7 +239,7 @@ estilo_estetico = """
     [data-testid="stSidebar"] input {
         background-color: #334155 !important;
         color: white !important;
-        border: none !important;
+        border: 1px solid #475569 !important;
     }
 </style>
 """
@@ -405,7 +426,7 @@ for key, val in list(st.session_state.items()):
         subtotal_gen += sub_extra
         ex_c1, ex_c2, ex_c3, ex_c4, ex_c5 = st.columns([3, 2, 2, 2, 1])
         ex_c1.write(f"📌 **Extra:** {val['desc']}")
-        ex_c2.write(f"Cant: {val['cant']}")
+        ex_c2.write(f"Cant: {val['desc']}")
         ex_c3.write(f"Precio U: ${val['precio']:.2f}")
         ex_c4.metric("Subtotal", f"${sub_extra:.2f}")
         if ex_c5.button("❌", key=f"del_{key}"):
@@ -440,4 +461,3 @@ if filas:
     st.markdown("<br>", unsafe_allow_html=True)
     href = f'<a href="data:application/octet-stream;base64,{b64}" download="{codigo}.pdf"><button style="width:100%; padding:15px; background-color:#c97a6e; color:white; font-size:18px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">📥 DESCARGAR PRESUPUESTO EN PDF</button></a>'
     st.markdown(href, unsafe_allow_html=True)
-conn.close()
