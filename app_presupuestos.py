@@ -10,12 +10,11 @@ def init_db():
     conn = sqlite3.connect("presupuestos_app.db")
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS catalogo 
-                      (id INTEGER PRIMARY KEY AUTOINCREMENT, categoria TEXT, item_es TEXT, item_en TEXT, precio_base REAL, unidad TEXT)''')
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT, categoria TEXT, item_es TEXT, item_en TEXT, precio_base REAL, unidad TEXT)''')
     
     cursor.execute('''CREATE TABLE IF NOT EXISTS clientes 
-                      (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT UNIQUE)''')
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT UNIQUE)''')
     
-    # Aumentamos el contador para obligar a cargar los nuevos ítems
     cursor.execute("SELECT COUNT(*) FROM catalogo")
     if cursor.fetchone()[0] < 75:
         cursor.execute("DELETE FROM catalogo") 
@@ -63,7 +62,7 @@ def init_db():
             ("Paneles", "Centro de Carga Principal (Load Center) 3-Fases 225A", "3-Phase 225A Main Load Center Install", 1200.0, "servicio"),
             ("Paneles", "Cargador para Vehículo Eléctrico (EV Charger NEMA 14-50)", "EV Charger Installation (NEMA 14-50)", 450.0, "unidad"),
             ("Paneles", "Interruptor de Transferencia Manual 30A/50A (Generador)", "Manual Transfer Switch 30A/50A (Generator)", 350.0, "unidad"),
-            ("Paneles", "Limpieza profunda, Torquedao e Inspección de Tablero", "Panel Torquing, Cleaning & Inspection", 150.0, "servicio"),
+            ("Paneles", "Limpieza profunda, Torqueado e Inspección de Tablero", "Panel Torquing, Cleaning & Inspection", 150.0, "servicio"),
             ("Paneles", "Instalación de Supresor de Picos General (SPD)", "Whole-House / Commercial Surge Protector", 250.0, "unidad"),
             
             # 5. MOTORES, CONTACTORES, TRANSFORMADORES Y CONTROLES
@@ -111,11 +110,11 @@ def crear_pdf(cliente, codigo, fecha, subtotal, tax, total, items, is_es):
     pdf = FPDF()
     pdf.add_page()
     
-    # --- ENCABEZADO ACTUALIZADO EXACTO COMO PEDISTE ---
+    # --- ENCABEZADO ACTUALIZADO CON LA DIRECCIÓN CORRECTA (Foxbrick) ---
     pdf.set_font("Arial", 'B', 14)
     pdf.cell(200, 8, txt="R.D. Avendano Solution", ln=True, align='C')
     pdf.set_font("Arial", size=10)
-    pdf.cell(200, 5, txt="Houston, Texas", ln=True, align='C')
+    pdf.cell(200, 5, txt="7150 Foxbrick Ln, Apt 4105, Humble, TX 77338", ln=True, align='C')
     pdf.cell(200, 5, txt="Tel: (346) 333-5819 | Email: ricardodario.a@gmail.com", ln=True, align='C')
     pdf.ln(5)
     
@@ -128,7 +127,7 @@ def crear_pdf(cliente, codigo, fecha, subtotal, tax, total, items, is_es):
     pdf.cell(200, 6, txt=f"Cliente / Client: {cliente}", ln=True, align='L')
     pdf.ln(5)
     
-    pdf.set_fill_color(200, 220, 255)
+    pdf.set_fill_color(220, 230, 242) # Ajustado al color elegante de facturas
     pdf.set_font("Arial", 'B', 10)
     h_desc = "Descripción de los Trabajos / Materiales" if is_es else "Job / Material Description"
     h_cant = "Cant" if is_es else "Qty"
@@ -136,7 +135,7 @@ def crear_pdf(cliente, codigo, fecha, subtotal, tax, total, items, is_es):
     pdf.cell(105, 8, h_desc, border=1, fill=True)
     pdf.cell(15, 8, h_cant, border=1, align='C', fill=True)
     pdf.cell(35, 8, h_precio, border=1, align='C', fill=True)
-    pdf.cell(35, 10, "Subtotal", border=1, align='C', fill=True)
+    pdf.cell(35, 8, "Subtotal", border=1, align='C', fill=True)
     pdf.ln()
     
     pdf.set_font("Arial", size=10)
@@ -172,6 +171,58 @@ def crear_pdf(cliente, codigo, fecha, subtotal, tax, total, items, is_es):
     return pdf_bytes
 
 st.set_page_config(page_title="Presupuestos - R.D. Avendano Solution", layout="wide", page_icon="⚡")
+
+# --- INYECCIÓN DE ESTÉTICA PREMIUM (Igual a la de Facturas) ---
+estilo_estetico = """
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
+    
+    .stApp {
+        background-color: #f1f5f9;
+        font-family: 'Inter', sans-serif;
+        color: #1e293b;
+    }
+    
+    h1, h2, h3, h4 {
+        font-family: 'Space Grotesk', sans-serif !important;
+        color: #1e293b !important;
+    }
+    
+    h1 {
+        color: #c97a6e !important;
+        font-weight: 700 !important;
+    }
+    
+    /* Botones estilizados con el color terracota/salmón de la app de facturas */
+    .stButton > button, div[data-testid="stFormSubmitButton"] > button, div[data-testid="stDownloadButton"] > button {
+        background-color: #c97a6e !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 10px 16px !important;
+        transition: all 0.2s !important;
+        width: 100%;
+    }
+    .stButton > button:hover, div[data-testid="stFormSubmitButton"] > button:hover {
+        background-color: #b0665a !important;
+    }
+    
+    /* Barra lateral elegante */
+    [data-testid="stSidebar"] {
+        background-color: #1e293b !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #f8fafc !important;
+    }
+    [data-testid="stSidebar"] input {
+        background-color: #334155 !important;
+        color: white !important;
+        border: none !important;
+    }
+</style>
+"""
+st.markdown(estilo_estetico, unsafe_allow_html=True)
 
 idioma = st.sidebar.radio("🌐 Idioma del PDF / PDF Language", ["Español", "English"])
 is_es = idioma == "Español"
@@ -313,8 +364,6 @@ st.markdown("---")
 st.subheader("🛒 Construir Presupuesto")
 
 df_catalogo = pd.read_sql_query("SELECT * FROM catalogo", conn)
-
-# SOLUCIÓN AL BORRADO: La lista de opciones ahora es bilingüe siempre, así no cambia al presionar el botón de idioma.
 df_catalogo['display'] = df_catalogo['categoria'] + " - " + df_catalogo['item_es'] + " / " + df_catalogo['item_en']
 
 items_seleccionados = st.multiselect("Busca materiales o mano de obra (bilingüe):", df_catalogo['display'].tolist(), key="selector_items")
@@ -328,7 +377,6 @@ if items_seleccionados:
         row = df_catalogo[df_catalogo['display'] == item].iloc[0]
         c1, c2, c3, c4 = st.columns([4, 2, 2, 2])
         
-        # El cuadro de texto se auto-traduce dependiendo del radio button superior
         default_desc = row['item_es'] if is_es else row['item_en']
         
         desc = c1.text_input(f"Concepto {i+1}", value=default_desc, key=f"d_{i}_{is_es}")
@@ -390,7 +438,6 @@ if filas:
     
     b64 = base64.b64encode(pdf_bytes).decode()
     st.markdown("<br>", unsafe_allow_html=True)
-    href = f'<a href="data:application/octet-stream;base64,{b64}" download="{codigo}.pdf"><button style="width:100%; padding:15px; background-color:#2e7b32; color:white; font-size:18px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">📥 DESCARGAR PRESUPUESTO EN PDF</button></a>'
+    href = f'<a href="data:application/octet-stream;base64,{b64}" download="{codigo}.pdf"><button style="width:100%; padding:15px; background-color:#c97a6e; color:white; font-size:18px; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">📥 DESCARGAR PRESUPUESTO EN PDF</button></a>'
     st.markdown(href, unsafe_allow_html=True)
-
 conn.close()
